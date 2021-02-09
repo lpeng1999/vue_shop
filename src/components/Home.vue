@@ -21,6 +21,7 @@
           :collapse="isCollapse"
           :collapse-transition="false"
           router
+          :default-active="activePath"
         >
           <!-- 一级菜单 -->
           <el-submenu
@@ -40,6 +41,7 @@
               :index="'/' + subItem.path"
               v-for="subItem in item.children"
               :key="subItem.id"
+              @click="saveNavState('/' + subItem.path)"
             >
               <template slot="title">
                 <i class="el-icon-menu"></i>
@@ -72,11 +74,14 @@ export default {
         145: 'iconfont icon-baobiao'
       },
       // 是否折叠
-      isCollapse: false
+      isCollapse: false,
+      // 激活的链接地址
+      activePath: ''
     }
   },
   created() {
     this.getMenuList()
+    this.activePath = window.sessionStorage.getItem('activePath')
   },
   methods: {
     logout() {
@@ -88,13 +93,18 @@ export default {
     // 获取菜单数据
     async getMenuList() {
       const { data: res } = await this.$http.get('menus')
-      console.log(res)
+      // console.log(res)
       if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
       this.menuList = res.data
     },
     // 切换菜单展开/折叠
     toggleCollapse() {
       this.isCollapse = !this.isCollapse
+    },
+    // 保存链接激活状态
+    saveNavState(activePath) {
+      window.sessionStorage.setItem('activePath', activePath)
+      this.activePath = activePath
     }
   }
 }
