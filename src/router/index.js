@@ -9,6 +9,10 @@ import Home from '../components/Home.vue'
 import Welcome from '../components/Welcome.vue'
 // 用户列表
 import Users from '../components/user/Users.vue'
+// 用户权限列表
+import Rights from '../components/power/Rights.vue'
+// 角色列表
+import Roles from '../components/power/Roles.vue'
 
 Vue.use(VueRouter)
 
@@ -33,6 +37,14 @@ const routes = [
       {
         path: '/users',
         component: Users
+      },
+      {
+        path: '/rights',
+        component: Rights
+      },
+      {
+        path: '/roles',
+        component: Roles
       }
     ]
   }
