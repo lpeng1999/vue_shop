@@ -3,6 +3,7 @@ import App from './App.vue'
 import router from './router'
 import './plugins/element.js'
 import axios from 'axios'
+import ZkTable from 'vue-table-with-tree-grid'
 
 // 全局样式
 import './assets/css/global.css'
@@ -21,6 +22,9 @@ axios.interceptors.request.use(config => {
 })
 // 挂载 axios
 Vue.prototype.$http = axios
+
+// 树形表格组件
+Vue.component('tree-table', ZkTable)
 
 new Vue({
   router,

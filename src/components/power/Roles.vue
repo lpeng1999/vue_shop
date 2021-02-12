@@ -191,24 +191,8 @@ export default {
       addRoleDialogVisible: false,
       // 添加角色的验证规则
       addFormRules: {
-        roleName: [
-          { required: true, message: '角色名称', trigger: 'blur' },
-          {
-            min: 1,
-            max: 10,
-            message: '角色名称的长度在 1 到 10 个字符',
-            trigger: 'blur'
-          }
-        ],
-        roleDesc: [
-          { required: true, message: '角色描述', trigger: 'blur' },
-          {
-            min: 1,
-            max: 10,
-            message: '角色描述的长度在 1 到 10 个字符',
-            trigger: 'blur'
-          }
-        ]
+        roleName: [{ required: true, message: '请输入角色名称', trigger: 'blur' }],
+        roleDesc: [{ required: true, message: '请输入角色描述', trigger: 'blur' }]
       },
       // 编辑角色对话框是否显示
       editRoleDialogVisible: false,
@@ -216,24 +200,8 @@ export default {
       editForm: {},
       // 编辑角色的验证规则
       editFormRules: {
-        roleName: [
-          { required: true, message: '角色名称', trigger: 'blur' },
-          {
-            min: 1,
-            max: 10,
-            message: '角色名称的长度在 1 到 10 个字符',
-            trigger: 'blur'
-          }
-        ],
-        roleDesc: [
-          { required: true, message: '角色描述', trigger: 'blur' },
-          {
-            min: 1,
-            max: 10,
-            message: '角色描述的长度在 1 到 10 个字符',
-            trigger: 'blur'
-          }
-        ]
+        roleName: [{ required: true, message: '请输入角色名称', trigger: 'blur' }],
+        roleDesc: [{ required: true, message: '请输入角色描述', trigger: 'blur' }]
       },
       // 分配权限对话框是否显示
       setRightDialogVisible: false,
