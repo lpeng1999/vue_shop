@@ -94,9 +94,10 @@
             <el-input v-model="addCateForm.cat_name"></el-input>
           </el-form-item>
           <el-form-item label="父级分类">
+            <!-- 级联选择器 -->
             <!-- options 用来指定数据源 -->
             <!-- props 用来指定配置对象 -->
-            <!-- v-model(设置级联菜单绑定数据) -->
+            <!-- v-model 设置级联菜单绑定数据 -->
             <el-cascader
               :options="parentCateList"
               :props="cascaderProps"
