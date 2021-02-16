@@ -31,3 +31,14 @@ body,
 .el-cascader-menu {
   height: 230px;
 }
+/* 步骤条 */
+.el-steps{
+  margin: 15px 0;
+}
+.el-step__title{
+  font-size: 12px;
+}
+/* 富文本编辑器 */
+.ql-editor{
+  min-height: 300px;
+}
