@@ -22,7 +22,8 @@ import Goodlist from '../components/goods/List.vue'
 import Add from '../components/goods/Add.vue'
 // 订单列表
 import Order from '../components/order/order.vue'
-
+// 数据报表
+import Report from '../components/report/Report.vue'
 Vue.use(VueRouter)
 
 const routes = [
@@ -74,6 +75,10 @@ const routes = [
       {
         path: '/orders',
         component: Order
+      },
+      {
+        path: '/reports',
+        component: Report
       }
     ]
   }
