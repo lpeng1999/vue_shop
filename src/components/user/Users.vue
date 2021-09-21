@@ -11,23 +11,12 @@
       <!-- 搜索和添加 -->
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-input
-            placeholder="请输入内容"
-            v-model="queryInfo.query"
-            clearable
-            @clear="getUserList"
-          >
-            <el-button
-              slot="append"
-              icon="el-icon-search"
-              @click="getUserList"
-            ></el-button>
+          <el-input placeholder="请输入内容" v-model="queryInfo.query" clearable @clear="getUserList">
+            <el-button slot="append" icon="el-icon-search" @click="getUserList"></el-button>
           </el-input>
         </el-col>
         <el-col :span="4">
-          <el-button type="primary" @click="addDialogVisible = true"
-            >添加用户</el-button
-          >
+          <el-button type="primary" @click="addDialogVisible = true">添加用户</el-button>
         </el-col>
       </el-row>
       <!-- 用户列表 -->
@@ -41,59 +30,22 @@
         <el-table-column label="状态">
           <template slot-scope="scope">
             <!-- 开关 -->
-            <el-switch
-              v-model="scope.row.mg_state"
-              @change="stateChanged(scope.row.id, scope.row.mg_state)"
-            >
-            </el-switch>
+            <el-switch v-model="scope.row.mg_state" @change="stateChanged(scope.row.id, scope.row.mg_state)"> </el-switch>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="180px">
           <template slot-scope="scope">
             <!-- 修改 -->
-            <el-tooltip
-              class="item"
-              effect="dark"
-              content="修改"
-              placement="top"
-              :enterable="false"
-            >
-              <el-button
-                type="primary"
-                icon="el-icon-edit"
-                size="mini"
-                @click="showEditDialog(scope.row.id)"
-              ></el-button>
+            <el-tooltip class="item" effect="dark" content="修改" placement="top" :enterable="false">
+              <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row.id)"></el-button>
             </el-tooltip>
             <!-- 删除 -->
-            <el-tooltip
-              class="item"
-              effect="dark"
-              content="删除"
-              placement="top"
-              :enterable="false"
-            >
-              <el-button
-                type="danger"
-                icon="el-icon-delete"
-                size="mini"
-                @click="removeUserById(scope.row.id)"
-              ></el-button>
+            <el-tooltip class="item" effect="dark" content="删除" placement="top" :enterable="false">
+              <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeUserById(scope.row.id)"></el-button>
             </el-tooltip>
             <!-- 分配角色权限 -->
-            <el-tooltip
-              class="item"
-              effect="dark"
-              content="分配角色"
-              placement="top"
-              :enterable="false"
-            >
-              <el-button
-                type="warning"
-                icon="el-icon-setting"
-                size="mini"
-                @click="showSetRoleDialog(scope.row)"
-              ></el-button>
+            <el-tooltip class="item" effect="dark" content="分配角色" placement="top" :enterable="false">
+              <el-button type="warning" icon="el-icon-setting" size="mini" @click="showSetRoleDialog(scope.row)"></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -111,18 +63,8 @@
       </el-pagination>
     </el-card>
     <!-- 添加用户对话框 -->
-    <el-dialog
-      title="添加用户"
-      :visible.sync="addDialogVisible"
-      width="50%"
-      @close="addDialogClose"
-    >
-      <el-form
-        :model="addForm"
-        :rules="addFormRules"
-        ref="addFormRef"
-        label-width="70px"
-      >
+    <el-dialog title="添加用户" :visible.sync="addDialogVisible" width="50%" @close="addDialogClose">
+      <el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="70px">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="addForm.username"></el-input>
         </el-form-item>
@@ -143,18 +85,8 @@
       </span>
     </el-dialog>
     <!-- 修改用户对话框 -->
-    <el-dialog
-      title="修改用户"
-      :visible.sync="editDialogVisible"
-      width="50%"
-      @close="editDialogClose"
-    >
-      <el-form
-        :model="editForm"
-        :rules="editFormRules"
-        ref="editFormRef"
-        label-width="70px"
-      >
+    <el-dialog title="修改用户" :visible.sync="editDialogVisible" width="50%" @close="editDialogClose">
+      <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="70px">
         <el-form-item label="用户名">
           <el-input v-model="editForm.username" disabled></el-input>
         </el-form-item>
@@ -171,25 +103,14 @@
       </span>
     </el-dialog>
     <!-- 分配角色对话框 -->
-    <el-dialog
-      title="分配角色"
-      :visible.sync="setRoledialogVisible"
-      width="50%"
-      @close="closeSetRoledDialog"
-    >
+    <el-dialog title="分配角色" :visible.sync="setRoledialogVisible" width="50%" @close="closeSetRoledDialog">
       <div>
         <p>当前的用户：{{ userInfo.username }}</p>
         <p>当前的角色：{{ userInfo.role_name }}</p>
         <p>
           分配新角色：
           <el-select v-model="selectRolesId" placeholder="请选择">
-            <el-option
-              v-for="item in rolesList"
-              :key="item.id"
-              :label="item.roleName"
-              :value="item.id"
-            >
-            </el-option>
+            <el-option v-for="item in rolesList" :key="item.id" :label="item.roleName" :value="item.id"> </el-option>
           </el-select>
         </p>
       </div>
@@ -330,9 +251,7 @@ export default {
     // 用户状态改变
     async stateChanged(id, newState) {
       // console.log(id,newState)
-      const { data: res } = await this.$http.put(
-        `users/${id})/state/${newState}`
-      )
+      const { data: res } = await this.$http.put(`users/${id})/state/${newState}`)
       // console.log(res)
       if (res.meta.status !== 200) {
         newState = !newState
@@ -376,13 +295,10 @@ export default {
     editUser() {
       this.$refs.editFormRef.validate(async valid => {
         if (!valid) return
-        const { data: res } = await this.$http.put(
-          'users/' + this.editForm.id,
-          {
-            email: this.editForm.email,
-            mobile: this.editForm.mobile
-          }
-        )
+        const { data: res } = await this.$http.put('users/' + this.editForm.id, {
+          email: this.editForm.email,
+          mobile: this.editForm.mobile
+        })
         if (res.meta.status !== 200) {
           return this.$message.error('更新用户信息失败！')
         }
@@ -395,15 +311,11 @@ export default {
     },
     // 根据 id 删除 用户信息
     async removeUserById(id) {
-      const result = await this.$confirm(
-        '此操作将永久删除该用户, 是否继续?',
-        '提示',
-        {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }
-      ).catch(err => err)
+      const result = await this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(err => err)
       // console.log(result)
       // 确定返回 confirm，取消返回 cancel
       // 判断是否删除
@@ -434,12 +346,9 @@ export default {
       if (!this.selectRolesId) {
         return this.$message.error('请选择要分配的角色！')
       }
-      const { data: res } = await this.$http.put(
-        `users/${this.userInfo.id}/role`,
-        {
-          rid: this.selectRolesId
-        }
-      )
+      const { data: res } = await this.$http.put(`users/${this.userInfo.id}/role`, {
+        rid: this.selectRolesId
+      })
       if (res.meta.status !== 200) {
         return this.$message.error('更新角色失败！')
       }

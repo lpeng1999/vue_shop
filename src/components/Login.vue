@@ -6,25 +6,14 @@
         <img src="../assets/logo.png" alt="" />
       </div>
       <!-- 登录框 -->
-      <el-form
-        ref="loginRef"
-        :rules="loginRules"
-        :model="loginForm"
-        class="login_from"
-      >
+      <el-form ref="loginRef" :rules="loginRules" :model="loginForm" class="login_from">
         <!-- 用户名 -->
         <el-form-item prop="username">
-          <el-input
-            v-model="loginForm.username"
-            prefix-icon="iconfont icon-user"
-          ></el-input>
+          <el-input v-model="loginForm.username" prefix-icon="iconfont icon-user"></el-input>
         </el-form-item>
         <!-- 密码 -->
         <el-form-item prop="password">
-          <el-input
-            v-model="loginForm.password"
-            prefix-icon="iconfont icon-3702mima"
-          ></el-input>
+          <el-input v-model="loginForm.password" prefix-icon="iconfont icon-3702mima"></el-input>
         </el-form-item>
         <!-- 按钮 -->
         <el-form-item class="btns">
@@ -82,7 +71,7 @@ export default {
         // console.log(valid)
         if (!valid) return false
         const { data: res } = await this.$http.post('login', this.loginForm)
-        // console.log(res)
+        console.log(res)
         if (res.meta.status !== 200) return this.$message.error('登录失败')
         this.$message.success('登录成功')
         // 保存 token

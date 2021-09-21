@@ -11,17 +11,8 @@
       <!-- 搜索和添加 -->
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-input
-            placeholder="请输入内容"
-            v-model="queryInfo.query"
-            clearable
-            @clear="getGoodsList"
-          >
-            <el-button
-              slot="append"
-              icon="el-icon-search"
-              @click="getGoodsList"
-            ></el-button>
+          <el-input placeholder="请输入内容" v-model="queryInfo.query" clearable @clear="getGoodsList">
+            <el-button slot="append" icon="el-icon-search" @click="getGoodsList"></el-button>
           </el-input>
         </el-col>
         <el-col :span="4">
@@ -32,10 +23,8 @@
       <el-table :data="goodsList" border stripe>
         <el-table-column label="#" type="index"> </el-table-column>
         <el-table-column label="商品名称" prop="goods_name"> </el-table-column>
-        <el-table-column label="商品价格(元)" prop="goods_price" width="95px">
-        </el-table-column>
-        <el-table-column label="商品重量" prop="goods_weight" width="70px">
-        </el-table-column>
+        <el-table-column label="商品价格(元)" prop="goods_price" width="95px"> </el-table-column>
+        <el-table-column label="商品重量" prop="goods_weight" width="70px"> </el-table-column>
         <el-table-column label="创建时间" prop="add_time" width="140px">
           <template slot-scope="scope">
             {{ scope.row.add_time | dateFormat }}
@@ -44,34 +33,12 @@
         <el-table-column label="操作" width="130px">
           <template slot-scope="scope">
             <!-- 修改 -->
-            <el-tooltip
-              class="item"
-              effect="dark"
-              content="修改"
-              placement="top"
-              :enterable="false"
-            >
-              <el-button
-                type="primary"
-                icon="el-icon-edit"
-                size="mini"
-                @click="showEditDialog(scope.row.goods_id)"
-              ></el-button>
+            <el-tooltip class="item" effect="dark" content="修改" placement="top" :enterable="false">
+              <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row.goods_id)"></el-button>
             </el-tooltip>
             <!-- 删除 -->
-            <el-tooltip
-              class="item"
-              effect="dark"
-              content="删除"
-              placement="top"
-              :enterable="false"
-            >
-              <el-button
-                type="danger"
-                icon="el-icon-delete"
-                size="mini"
-                @click="removeById(scope.row.goods_id)"
-              ></el-button>
+            <el-tooltip class="item" effect="dark" content="删除" placement="top" :enterable="false">
+              <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeById(scope.row.goods_id)"></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -89,18 +56,8 @@
       </el-pagination>
     </el-card>
     <!-- 编辑属性对话框 -->
-    <el-dialog
-      title="修改商品"
-      :visible.sync="editDialogVisible"
-      width="50%"
-      @close="closeEditDialog"
-    >
-      <el-form
-        :model="editForm"
-        :rules="editFormRules"
-        ref="editFormRef"
-        label-width="100px"
-      >
+    <el-dialog title="修改商品" :visible.sync="editDialogVisible" width="50%" @close="closeEditDialog">
+      <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="100px">
         <el-form-item label="商品名称" prop="goods_name">
           <el-input v-model="editForm.goods_name"></el-input>
         </el-form-item>
@@ -147,21 +104,11 @@ export default {
       editForm: {},
       // 编辑商品的验证规则
       editFormRules: {
-        goods_name: [
-          { required: true, message: '请输入商品名称', trigger: 'blur' }
-        ],
-        goods_price: [
-          { required: true, message: '请输入商品价格', trigger: 'blur' }
-        ],
-        goods_number: [
-          { required: true, message: '请输入商品数量', trigger: 'blur' }
-        ],
-        goods_weight: [
-          { required: true, message: '请输入商品重量', trigger: 'blur' }
-        ],
-        goods_introduce: [
-          { required: true, message: '请输入商品介绍', trigger: 'blur' }
-        ]
+        goods_name: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
+        goods_price: [{ required: true, message: '请输入商品价格', trigger: 'blur' }],
+        goods_number: [{ required: true, message: '请输入商品数量', trigger: 'blur' }],
+        goods_weight: [{ required: true, message: '请输入商品重量', trigger: 'blur' }],
+        goods_introduce: [{ required: true, message: '请输入商品介绍', trigger: 'blur' }]
       }
     }
   },
@@ -194,15 +141,11 @@ export default {
     },
     // 删除商品
     async removeById(id) {
-      const result = await this.$confirm(
-        '此操作将永久删除该商品, 是否继续?',
-        '提示',
-        {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }
-      ).catch(err => err)
+      const result = await this.$confirm('此操作将永久删除该商品, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(err => err)
       // console.log(result)
       // 确定返回 confirm，取消返回 cancel
       // 判断是否删除
@@ -235,17 +178,14 @@ export default {
     editCate() {
       this.$refs.editFormRef.validate(async valid => {
         if (!valid) return
-        const { data: res } = await this.$http.put(
-          `goods/${this.editForm.goods_id}`,
-          {
-            goods_name: this.editForm.goods_name,
-            goods_price: this.editForm.goods_price,
-            goods_number: this.editForm.goods_number,
-            goods_weight: this.editForm.goods_weight,
-            goods_introduce: this.editForm.goods_introduce,
-            goods_cat: this.editForm.goods_cat
-          }
-        )
+        const { data: res } = await this.$http.put(`goods/${this.editForm.goods_id}`, {
+          goods_name: this.editForm.goods_name,
+          goods_price: this.editForm.goods_price,
+          goods_number: this.editForm.goods_number,
+          goods_weight: this.editForm.goods_weight,
+          goods_introduce: this.editForm.goods_introduce,
+          goods_cat: this.editForm.goods_cat
+        })
         console.log(res)
         if (res.meta.status !== 200) {
           return this.$message.error('修改商品失败！')
