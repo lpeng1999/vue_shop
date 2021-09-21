@@ -26,6 +26,7 @@
 </template>
 
 <script>
+import { login } from '../request/api'
 export default {
   name: 'Login',
   data() {
@@ -70,12 +71,12 @@ export default {
       this.$refs.loginRef.validate(async valid => {
         // console.log(valid)
         if (!valid) return false
-        const { data: res } = await this.$http.post('login', this.loginForm)
-        console.log(res)
-        if (res.meta.status !== 200) return this.$message.error('登录失败')
+        const { data, meta } = await login(this.loginForm)
+        console.log(data)
+        if (meta.status !== 200) return this.$message.error('登录失败')
         this.$message.success('登录成功')
         // 保存 token
-        window.sessionStorage.setItem('token', res.data.token)
+        window.sessionStorage.setItem('token', data.token)
         // 跳转到后台主页
         this.$router.push('/home')
       })

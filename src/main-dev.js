@@ -2,7 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import './plugins/element.js'
-import './axios/axios.js'
+// import './axios/axios.js'
 
 // 树形表格组件
 import ZkTable from 'vue-table-with-tree-grid'
