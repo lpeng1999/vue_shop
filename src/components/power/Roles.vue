@@ -99,6 +99,7 @@
 </template>
 
 <script>
+import { Roles, getRights } from '@/request/api'
 export default {
   data() {
     return {
@@ -146,12 +147,11 @@ export default {
   methods: {
     // 获取角色列表
     async getRightsList() {
-      const { data: res } = await this.$http.get('roles')
-      // console.log(res)
-      if (res.meta.status !== 200) {
-        return this.$message.error('获取角色列表失败！')
-      }
-      this.rolesList = res.data
+      const { data, meta } = await Roles.getRoles()
+      if (meta.status !== 200) return this.$message.error('获取角色列表失败！')
+      // console.log(data)
+
+      this.rolesList = data
     },
     // 关闭添加角色对话框时重置表单
     addDialogClose() {
@@ -161,24 +161,20 @@ export default {
     addRoles() {
       this.$refs.addFormRef.validate(async valid => {
         if (!valid) return
-        const { data: res } = await this.$http.post('roles', this.addForm)
-        if (res.meta.status !== 201) {
-          return this.$message.error('添加角色失败！')
-        }
-        // 关闭对话框
+        const { meta } = await Roles.createRole(this.addForm)
+        if (meta.status !== 201) return this.$message.error('添加角色失败！')
+
         this.addRoleDialogVisible = false
-        // 刷新数据列表
         this.getRightsList()
         this.$message.success('添加角色成功！')
       })
     },
     // 显示修改用户对话框
     async showEditDialog(id) {
-      const { data: res } = await this.$http.get(`roles/${id}`)
-      if (res.meta.status !== 200) {
-        return this.$message.error('查询角色信息失败！')
-      }
-      this.editForm = res.data
+      const { data, meta } = await Roles.getRoleById(id)
+      if (meta.status !== 200) return this.$message.error('查询角色信息失败！')
+
+      this.editForm = data
       this.editRoleDialogVisible = true
     },
     // 关闭编辑角色对话框时重置表单
@@ -189,16 +185,13 @@ export default {
     editRoles() {
       this.$refs.editFormRef.validate(async valid => {
         if (!valid) return
-        const { data: res } = await this.$http.put('roles/' + this.editForm.roleId, {
+        const { meta } = await Roles.updateRoleById(this.editForm.roleId, {
           roleName: this.editForm.roleName,
           roleDesc: this.editForm.roleDesc
         })
-        if (res.meta.status !== 200) {
-          return this.$message.error('编辑角色信息失败！')
-        }
-        // 关闭对话框
+        if (meta.status !== 200) return this.$message.error('编辑角色信息失败！')
+
         this.editRoleDialogVisible = false
-        // 刷新数据列表
         this.getRightsList()
         this.$message.success('编辑角色信息成功！')
       })
@@ -213,18 +206,15 @@ export default {
       // console.log(result)
       // 确定返回 confirm，取消返回 cancel
       // 判断是否删除
-      if (result !== 'confirm') {
-        return this.$message.info('已取消删除！')
-      }
-      const { data: res } = await this.$http.delete('roles/' + id)
-      if (res.meta.status !== 200) {
-        return this.$message.error('删除用户失败！')
-      }
-      // 刷新数据列表
+      if (result !== 'confirm') return this.$message.info('已取消删除！')
+
+      const { meta } = await Roles.deleteRoleById(id)
+      if (meta.status !== 200) return this.$message.error('删除用户失败！')
+
       this.getRightsList()
       this.$message.success('删除用户成功！')
     },
-    // 根据 id 删除 用户权限
+    // 根据 id 删除角色指定权限
     async removeRightById(role, rightId) {
       const result = await this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
         confirmButtonText: '确定',
@@ -234,26 +224,22 @@ export default {
       // console.log(result)
       // 确定返回 confirm，取消返回 cancel
       // 判断是否删除
-      if (result !== 'confirm') {
-        return this.$message.info('已取消删除！')
-      }
-      const { data: res } = await this.$http.delete(`roles/${role.id}/rights/${rightId}`)
-      console.log(res)
-      if (res.meta.status !== 200) {
-        return this.$message.error('删除权限失败！')
-      }
-      // 刷新数据列表
-      role.children = res.data
+      if (result !== 'confirm') return this.$message.info('已取消删除！')
+
+      const { data, meta } = await Roles.deleteRoleRightById(role.id, rightId)
+      if (meta.status !== 200) return this.$message.error('删除权限失败！')
+      // console.log(data)
+
+      role.children = data
       this.$message.success('删除权限成功！')
     },
     // 显示分配权限对话框
     async showSetRolesDialog(role) {
-      const { data: res } = await this.$http.get('rights/tree')
-      if (res.meta.status !== 200) {
-        return this.$message.error('查询角色信息失败！')
-      }
-      console.log(res)
-      this.rightsList = res.data
+      const { data, meta } = await getRights('tree')
+      // console.log(data)
+      if (meta.status !== 200) return this.$message.error('查询角色信息失败！')
+
+      this.rightsList = data
       // 三级权限
       this.getLeafkeys(role, this.defKeys)
       // 分配权限的id
@@ -263,9 +249,8 @@ export default {
     // 递归获取角色三级权限id
     getLeafkeys(node, arr) {
       // 如果node节点没有children属性，则是三级节点
-      if (!node.children) {
-        return arr.push(node.id)
-      }
+      if (!node.children) return arr.push(node.id)
+
       node.children.forEach(item => {
         this.getLeafkeys(item, arr)
       })
@@ -278,14 +263,12 @@ export default {
     async allotRights() {
       const keys = [...this.$refs.treeRef.getCheckedKeys(), ...this.$refs.treeRef.getHalfCheckedKeys()]
       const idStr = keys.join(',')
-      const { data: res } = await this.$http.post(`roles/${this.roleId}/rights`, {
+      const { meta } = await Roles.updateRoleRightById(this.roleId, {
         rids: idStr
       })
-      if (res.meta.status !== 200) {
-        return this.$message.error('分配权限失败！')
-      }
+      if (meta.status !== 200) return this.$message.error('分配权限失败！')
+
       this.$message.success('分配权限成功！')
-      // 刷新数据列表
       this.getRightsList()
       this.setRightDialogVisible = false
     }

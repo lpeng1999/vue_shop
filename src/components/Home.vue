@@ -43,6 +43,7 @@
 </template>
 
 <script>
+import { getMenus } from '@/request/api'
 export default {
   data() {
     return {
@@ -75,10 +76,10 @@ export default {
     },
     // 获取菜单数据
     async getMenuList() {
-      const { data: res } = await this.$http.get('menus')
-      // console.log(res)
-      if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
-      this.menuList = res.data
+      const { data, meta } = await getMenus()
+      if (meta.status !== 200) return this.$message.error(meta.msg)
+      // console.log(data)
+      this.menuList = data
     },
     // 切换菜单展开/折叠
     toggleCollapse() {

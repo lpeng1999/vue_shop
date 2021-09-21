@@ -73,6 +73,7 @@
 
 <script>
 import _ from 'lodash'
+import { Categories, CategoriesAttributes, Goods } from '@/request/api'
 export default {
   data() {
     return {
@@ -114,7 +115,7 @@ export default {
       manyTabData: [],
       // 静态属性列表
       onlyTabData: [],
-      uploadUrl: 'http://127.0.0.1:8888/api/private/v1/upload',
+      uploadUrl: '',
       // 图片请求头
       headerObj: {
         Authorization: window.sessionStorage.getItem('token')
@@ -127,17 +128,25 @@ export default {
   },
   created() {
     this.getCateList()
+
+    let baseURL
+
+    if (process.env.NODE_ENV === 'development') {
+      baseURL = 'http://lpeng.top/api/private/v1'
+    } else if (process.env.NODE_ENV === 'production') {
+      baseURL = 'http://lpeng.top/api/private/v1'
+    }
+
+    this.uploadUrl = baseURL + '/upload'
   },
   methods: {
     async getCateList() {
-      const { data: res } = await this.$http.get('categories', {
+      const { data, meta } = await Categories.getCategories('categories', {
         params: this.queryInfo
       })
-      console.log(res)
-      if (res.meta.status !== 200) {
-        return this.$messsage.error('获取商品分类数据失败！')
-      }
-      this.cateList = res.data
+      if (meta.status !== 200) return this.$messsage.error('获取商品分类数据失败！')
+
+      this.cateList = data
     },
     // 选中项改变
     handleChange() {
@@ -159,26 +168,23 @@ export default {
     async tabClicked() {
       // 获取动态参数
       if (this.activeIndex === '1') {
-        const { data: res } = await this.$http.get(`categories/${this.cateId}/attributes`, {
-          params: { sel: 'many' }
+        const { data, meta } = await CategoriesAttributes.getAttributesById(this.cateId, {
+          sel: 'many'
         })
-        // console.log(res)
-        if (res.meta.status !== 200) {
-          return this.$message.error('获取动态参数失败！')
-        }
-        res.data.forEach(item => {
+        if (meta.status !== 200) return this.$message.error('获取动态参数失败！')
+        // console.log(data)
+
+        data.forEach(item => {
           item.attr_vals = item.attr_vals.length === 0 ? [] : item.attr_vals.split(' ')
         })
-        this.manyTabData = res.data
+
+        this.manyTabData = data
       } else if (this.activeIndex === '2') {
-        const { data: res } = await this.$http.get(`categories/${this.cateId}/attributes`, {
-          params: { sel: 'only' }
-        })
-        // console.log(res)
-        if (res.meta.status !== 200) {
-          return this.$message.error('获取静态属性失败！')
-        }
-        this.onlyTabData = res.data
+        const { data, meta } = await CategoriesAttributes.getAttributesById(this.cateId, { sel: 'only' })
+        if (meta.status !== 200) return this.$message.error('获取静态属性失败！')
+        // console.log(data)
+
+        this.onlyTabData = data
       }
     },
     // 移除图片
@@ -210,9 +216,8 @@ export default {
     // 添加商品前预校验并提交
     async add() {
       this.$refs.addFormRef.validate(async valid => {
-        if (!valid) {
-          return this.$message.error('请填写必要的表单项')
-        }
+        if (!valid) return this.$message.error('请填写必要的表单项')
+
         // 深拷贝 lodash cloneDeep(obj) 将goods_cat数组转换为字符串
         const form = _.cloneDeep(this.addForm)
         form.goods_cat = form.goods_cat.join(',')
@@ -231,11 +236,10 @@ export default {
         })
         form.attrs = this.addForm.attrs
         console.log(form)
+
         // 商品的名称，必须是唯一的
-        const { data: res } = await this.$http.post('goods', form)
-        if (res.meta.status !== 201) {
-          return this.$message.error('添加商品失败！')
-        }
+        const { meta } = await Goods.createGoods(form)
+        if (meta.status !== 201) return this.$message.error('添加商品失败！')
 
         this.$message.success('添加商品成功！')
         this.$router.push('/goods')

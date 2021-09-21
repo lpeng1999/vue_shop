@@ -81,6 +81,7 @@
 </template>
 
 <script>
+import { Categories } from '@/request/api'
 export default {
   data() {
     return {
@@ -165,15 +166,12 @@ export default {
   },
   methods: {
     async getCateList() {
-      const { data: res } = await this.$http.get('categories', {
-        params: this.queryInfo
-      })
-      if (res.meta.status !== 200) {
-        return this.$messsage.error('获取商品分类数据失败！')
-      }
-      // console.log(res)
-      this.cateList = res.data.result
-      this.total = res.data.total
+      const { data, meta } = await Categories.getCategories(this.queryInfo)
+      if (meta.status !== 200) return this.$messsage.error('获取商品分类数据失败！')
+      // console.log(data)
+
+      this.cateList = data.result
+      this.total = data.total
     },
     // pagesize当前的页数 改变
     handleSizeChange(newSize) {
@@ -187,24 +185,20 @@ export default {
     },
     // 显示添加分类对话框
     showAddDialogVisible() {
-      // 先获取数据
       this.getParentCateList()
       this.addDialogVisible = true
     },
     // 获取父级分类数据列表
     async getParentCateList() {
-      const { data: res } = await this.$http.get('categories', {
-        params: { type: 2 }
-      })
-      if (res.meta.status !== 200) {
-        return this.$messsage.error('获取商品分类列表数据失败！')
-      }
-      // console.log(res.data)
-      this.parentCateList = res.data
+      const { data, meta } = await Categories.getCategories({ type: 2 })
+      if (meta.status !== 200) return this.$messsage.error('获取商品分类列表数据失败！')
+      // console.log(data)
+
+      this.parentCateList = data
     },
     // 选中项改变
     parentCateChange() {
-      console.log(this.selectedKeys)
+      // console.log(this.selectedKeys)
       // 如果 selectedKeys 数组中的 length 大于0，证明选中的父级分类
       // 反之，就说明没有选中任何父级分类
       if (this.selectedKeys.length > 0) {
@@ -230,12 +224,9 @@ export default {
     addCate() {
       this.$refs.addCateFormRef.validate(async valid => {
         if (!valid) return
-        // console.log(this.addCateForm)
-        const { data: res } = await this.$http.post('categories', this.addCateForm)
-        // console.log(res)
-        if (res.meta.status !== 201) {
-          return this.$message.error('添加分类失败')
-        }
+        const { meta } = await Categories.createCategory(this.addCateForm)
+        if (meta.status !== 201) return this.$message.error('添加分类失败')
+
         this.getCateList()
         this.addDialogVisible = false
         this.$message.success('添加分类成功')
@@ -243,12 +234,10 @@ export default {
     },
     // 显示修改分类对话框
     async showEditDialog(id) {
-      const { data: res } = await this.$http.get(`categories/${id}`)
-      if (res.meta.status !== 200) {
-        return this.$message.error('查询分类信息失败！')
-      }
-      this.editForm = res.data
-      console.log(this.editForm)
+      const { data, meta } = await Categories.getCategoryById(id)
+      if (meta.status !== 200) return this.$message.error('查询分类信息失败！')
+
+      this.editForm = data
       this.editCateDialogVisible = true
     },
     // 关闭编辑角色对话框时重置表单
@@ -257,19 +246,14 @@ export default {
     },
     // 编辑分类前预校验并提交
     editCate() {
-      console.log(this.editForm)
       this.$refs.editFormRef.validate(async valid => {
-        console.log(valid)
         if (!valid) return
-        const { data: res } = await this.$http.put('categories/' + this.editForm.cat_id, {
+        const { meta } = await Categories.updateCategoryById(this.editForm.cat_id, {
           cat_name: this.editForm.cat_name
         })
-        if (res.meta.status !== 200) {
-          return this.$message.error('编辑分类信息失败！')
-        }
-        // 关闭对话框
+        if (meta.status !== 200) return this.$message.error('编辑分类信息失败！')
+
         this.editCateDialogVisible = false
-        // 刷新数据列表
         this.getCateList()
         this.$message.success('编辑分类信息成功！')
       })
@@ -284,14 +268,11 @@ export default {
       // console.log(result)
       // 确定返回 confirm，取消返回 cancel
       // 判断是否删除
-      if (result !== 'confirm') {
-        return this.$message.info('已取消删除！')
-      }
-      const { data: res } = await this.$http.delete('categories/' + id)
-      if (res.meta.status !== 200) {
-        return this.$message.error('删除用户失败！')
-      }
-      // 刷新数据列表
+      if (result !== 'confirm') return this.$message.info('已取消删除！')
+
+      const { meta } = await Categories.deleteCategoryById(id)
+      if (meta.status !== 200) return this.$message.error('删除用户失败！')
+
       this.getCateList()
       this.$message.success('删除商品分类成功！')
     }

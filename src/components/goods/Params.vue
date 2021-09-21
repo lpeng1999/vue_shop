@@ -125,6 +125,8 @@
 </template>
 
 <script>
+import { Categories, CategoriesAttributes } from '@/request/api'
+// import axios from 'axios'
 export default {
   data() {
     return {
@@ -170,13 +172,13 @@ export default {
     this.getCateList()
   },
   methods: {
+    // 获取商品分类列表
     async getCateList() {
-      const { data: res } = await this.$http.get('categories')
-      if (res.meta.status !== 200) {
-        return this.$messsage.error('获取商品分类列失败！')
-      }
-      console.log(res)
-      this.cateList = res.data
+      const { data, meta } = await Categories.getCategories()
+      if (meta.status !== 200) return this.$messsage.error('获取商品分类列失败！')
+      // console.log(data)
+
+      this.cateList = data
     },
     // 级联选择器选中项改变
     handleChange() {
@@ -188,34 +190,34 @@ export default {
     },
     // 获取参数列表
     async getParamsData() {
+      console.log(this.selectedKeys)
       // 不是三级分类 清空
       if (this.selectedKeys.length !== 3) {
         this.selectedKeys = []
         this.manyTableData = []
         this.onlyTableData = []
-        return
+        return false
       }
-      // console.log(this.selectedKeys)
       // 根据所选id和当前所在面板，获取对于参数
-      const { data: res } = await this.$http.get(`categories/${this.cateId}/attributes`, {
-        params: { sel: this.activeName }
+      const { data, meta } = await CategoriesAttributes.getAttributesById(this.cateId, {
+        sel: this.activeName
       })
-      if (res.meta.status !== 200) {
-        return this.$messsage.error('获取参数信息失败！')
-      }
-      res.data.forEach(item => {
+      if (meta.status !== 200) return this.$messsage.error('获取参数信息失败！')
+      // console.log(data)
+
+      data.forEach(item => {
         item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : []
         // 按钮和文本框切换
         item.inputVisible = false
         // 文本框输入值
         item.inputValue = ''
       })
-      // console.log(res.data)
+
       // 判断数据
       if (this.activeName === 'many') {
-        this.manyTabData = res.data
+        this.manyTabData = data
       } else {
-        this.onlyTabData = res.data
+        this.onlyTabData = data
       }
     },
     // 显示添加参数对话框
@@ -230,30 +232,25 @@ export default {
     addParams() {
       this.$refs.addFormRef.validate(async valid => {
         if (!valid) return
-        const { data: res } = await this.$http.post(`categories/${this.cateId}/attributes`, {
+        const { meta } = await CategoriesAttributes.createAttributeById(this.cateId, {
           attr_name: this.addForm.attr_name,
           attr_sel: this.activeName
         })
+        if (meta.status !== 201) return this.$message.error('添加参数失败！')
 
-        if (res.meta.status !== 201) {
-          return this.$message.error('添加参数失败！')
-        }
-
-        this.$message.success('添加参数成功！')
         this.addDialogVisible = false
+        this.$message.success('添加参数成功！')
         this.getParamsData()
       })
     },
     // 显示修改参数对话框
     async showEditDialog(attrId) {
-      const { data: res } = await this.$http.get(`categories/${this.cateId}/attributes/${attrId}`, {
+      const { data, meta } = await CategoriesAttributes.getAttributeById(this.cateId, attrId, {
         params: { attr_sel: this.activeName }
       })
+      if (meta.status !== 200) return this.$message.error('获取参数信息失败！')
 
-      if (res.meta.status !== 200) {
-        return this.$message.error('获取参数信息失败！')
-      }
-      this.editForm = res.data
+      this.editForm = data
       this.editDialogVisible = true
     },
     // 关闭修改对话框重置
@@ -264,10 +261,9 @@ export default {
     editParams() {
       this.$refs.editFormRef.validate(async valid => {
         if (!valid) return
-        const { data: res } = await this.$http.put(`categories/${this.cateId}/attributes/${this.editForm.attr_id}`, { attr_name: this.editForm.attr_name, attr_sel: this.activeName })
-        if (res.meta.status !== 200) {
-          return this.$message.error('修改参数失败！')
-        }
+        const { meta } = await CategoriesAttributes.updateAttributeById(this.cateId, this.editForm.attr_id, { attr_name: this.editForm.attr_name, attr_sel: this.activeName })
+        if (meta.status !== 200) return this.$message.error('修改参数失败！')
+
         this.$message.success('修改参数成功！')
         this.getParamsData()
         this.editDialogVisible = false
@@ -280,13 +276,11 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).catch(err => err)
-      if (confirmResult !== 'confirm') {
-        return this.$message.info('已取消删除！')
-      }
-      const { data: res } = await this.$http.delete(`categories/${this.cateId}/attributes/${attrId}`)
-      if (res.meta.status !== 200) {
-        return this.$message.error('删除参数失败！')
-      }
+      if (confirmResult !== 'confirm') return this.$message.info('已取消删除！')
+
+      const { meta } = await CategoriesAttributes.deleteAttributeById(this.cateId, attrId)
+      if (meta.status !== 200) return this.$message.error('删除参数失败！')
+
       this.$message.success('删除参数成功！')
       this.getParamsData()
     },
@@ -304,15 +298,13 @@ export default {
     },
     // 对 attr_vals 的操作，保存到数据库
     async saveAttrVals(row) {
-      const { data: res } = await this.$http.put(`categories/${this.cateId}/attributes/${row.attr_id}`, {
+      const { meta } = await CategoriesAttributes.updateAttributeById(this.cateId, this.editForm.attr_id, {
         attr_name: row.attr_name,
         attr_sel: row.attr_sel,
         attr_vals: row.attr_vals.join(' ')
       })
 
-      if (res.meta.status !== 200) {
-        return this.$message.error('修改参数项失败！')
-      }
+      if (meta.status !== 200) return this.$message.error('修改参数项失败！')
 
       this.$message.success('修改参数项成功！')
     },

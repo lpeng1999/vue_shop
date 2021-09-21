@@ -25,6 +25,7 @@
 </template>
 
 <script>
+import { getRights } from '@/request/api'
 export default {
   data() {
     return {
@@ -38,12 +39,11 @@ export default {
   methods: {
     // 获取权限列表
     async getRightList() {
-      const { data: res } = await this.$http.get('rights/list')
-      console.log(res)
-      if (res.meta.status !== 200) {
-        return this.$message.error('获取权限列表失败！')
-      }
-      this.rightsList = res.data
+      const { data, meta } = await getRights('list')
+      if (meta.status !== 200) return this.$message.error('获取权限列表失败！')
+      // console.log(data)
+
+      this.rightsList = data
     }
   }
 }

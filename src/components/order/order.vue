@@ -37,11 +37,11 @@
           <template slot-scope="scope">
             <!-- 修改 -->
             <el-tooltip class="item" effect="dark" content="修改订单地址" placement="top" :enterable="false">
-              <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row.goods_id)"></el-button>
+              <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row.order_id)"></el-button>
             </el-tooltip>
             <!-- 查看物流 -->
             <el-tooltip class="item" effect="dark" content="查看物流" placement="top" :enterable="false">
-              <el-button type="success" icon="el-icon-location" size="mini" @click="showProgressDialog(scope.row.goods_id)"></el-button>
+              <el-button type="success" icon="el-icon-location" size="mini" @click="showProgressDialog(scope.row.order_id)"></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -92,6 +92,7 @@
 <script>
 import cityData from './citydata.js'
 import progressData from './progress.js'
+import { Orders } from '@/request/api'
 export default {
   data() {
     return {
@@ -132,30 +133,27 @@ export default {
   methods: {
     // 获取订单数据列表
     async getOrdersList() {
-      const { data: res } = await this.$http.get('orders', {
-        params: this.queryInfo
-      })
-      console.log(res)
-      if (res.meta.status !== 200) {
-        return this.$message.error('获取订单列表失败！')
-      }
-      this.ordersList = res.data.goods
-      this.total = res.data.total
+      const { data, meta } = await Orders.getOrders(this.queryInfo)
+      if (meta.status !== 200) return this.$message.error('获取订单列表失败！')
+      // console.log(data)
+
+      this.ordersList = data.goods
+      this.total = data.total
     },
     // 每页条数改变
     handleSizeChange(newSize) {
-      // console.log(newSize)
       this.queryInfo.pagesize = newSize
       this.getOrdersList()
     },
     // 页码值改变
     handleCurrentChange(newPage) {
-      // console.log(newPage)
       this.queryInfo.pagenum = newPage
       this.getOrdersList()
     },
     // 显示编辑地址对话框
-    async showEditDialog(id) {
+    showEditDialog(id) {
+      // const { data, meta } = await Orders.getOrderById(id)
+      // console.log(data, meta)
       this.editDialogVisible = true
     },
     // 关闭编辑对话框重置
@@ -169,13 +167,13 @@ export default {
     // 编辑地址
     editOrder() {},
     // 显示查看物流对话框
-    showProgressDialog() {
-      // const { data: res } = await this.$http.get('/kuaidi/1106975712662')
-      // console.log(res)
-      // if (res.meta.status !== 200) {
-      //   return this.$message.error('获取物流信息失败！')
-      // }
-      // this.progressInfo = res.data
+    async showProgressDialog(id) {
+      // 供测试的物流单号：1106975712662
+      //  const { data, meta } = await Orders.getOrderLogisticById('1106975712662')
+      //  console.log(data, meta)
+      // if (meta.status !== 200) return this.$message.error('获取物流信息失败！')
+
+      // this.progressInfo = data
       this.progressDialogVisible = true
     },
     // 关闭查看物流对话框重置

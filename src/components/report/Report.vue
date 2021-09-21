@@ -20,7 +20,7 @@
 // import echarts from 'echarts'
 import * as echarts from 'echarts'
 import _ from 'lodash'
-
+import { getReports } from '@/request/api'
 export default {
   data() {
     return {
@@ -62,13 +62,11 @@ export default {
     // 3. 基于准备好的dom，初始化echarts实例
     var myChart = echarts.init(document.getElementById('main'))
 
-    const { data: res } = await this.$http.get('reports/type/1')
-    if (res.meta.status !== 200) {
-      return this.$message.error('获取折线图数据失败！')
-    }
+    const { data, meta } = await getReports()
+    if (meta.status !== 200) return this.$message.error('获取折线图数据失败！')
 
     // 4. 准备数据和配置项
-    const result = _.merge(res.data, this.options)
+    const result = _.merge(data, this.options)
 
     // 5. 展示数据
     myChart.setOption(result)

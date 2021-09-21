@@ -16,18 +16,18 @@ var instance = axios.create({
 
 // 环境的切换
 if (process.env.NODE_ENV === 'development') {
-  instance.defaults.baseURL = 'http://lpeng.top/api/private/v1/'
+  instance.defaults.baseURL = 'http://lpeng.top/api/private/v1'
 } else if (process.env.NODE_ENV === 'production') {
-  instance.defaults.baseURL = 'http://lpeng.top/api/private/v1/'
+  instance.defaults.baseURL = 'http://lpeng.top/api/private/v1'
 } else if (process.env.NODE_ENV === 'debug') {
   instance.defaults.baseURL = ''
 }
 
 // 线上接口出错时
-axios('')
+axios('/')
   .then(result => {
     if (result.status !== 200) {
-      instance.defaults.baseURL = 'http://lpeng.top:8888/api/private/v1/'
+      instance.defaults.baseURL = 'http://lpeng.top:8888/api/private/v1'
     }
   })
   .catch(err => {
@@ -83,7 +83,7 @@ instance.interceptors.response.use(
   },
   // 请求失败
   error => {
-    console.log(JSON.stringify(error))
+    console.log(error)
     return error
   }
 )

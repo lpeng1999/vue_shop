@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import { login } from '../request/api'
+import { login } from '@/request/api'
 export default {
   name: 'Login',
   data() {
@@ -72,10 +72,10 @@ export default {
         // console.log(valid)
         if (!valid) return false
         const { data, meta } = await login(this.loginForm)
-        console.log(data)
         if (meta.status !== 200) return this.$message.error('登录失败')
-        this.$message.success('登录成功')
-        // 保存 token
+        // console.log(data)
+
+        this.$message.success(meta.msg)
         window.sessionStorage.setItem('token', data.token)
         // 跳转到后台主页
         this.$router.push('/home')

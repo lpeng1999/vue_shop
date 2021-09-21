@@ -83,6 +83,7 @@
 </template>
 
 <script>
+import { Goods } from '@/request/api'
 export default {
   data() {
     return {
@@ -117,15 +118,12 @@ export default {
   },
   methods: {
     async getGoodsList() {
-      const { data: res } = await this.$http.get('goods', {
-        params: this.queryInfo
-      })
-      console.log(res)
-      if (res.meta.status !== 200) {
-        return this.$message.error('获取商品列表失败！')
-      }
-      this.goodsList = res.data.goods
-      this.total = res.data.total
+      const { data, meta } = await Goods.getGoods(this.queryInfo)
+      if (meta.status !== 200) return this.$message.error('获取商品列表失败！')
+      // console.log(data)
+
+      this.goodsList = data.goods
+      this.total = data.total
     },
     // 每页条数改变
     handleSizeChange(newSize) {
@@ -149,25 +147,22 @@ export default {
       // console.log(result)
       // 确定返回 confirm，取消返回 cancel
       // 判断是否删除
-      if (result !== 'confirm') {
-        return this.$message.info('已取消删除！')
-      }
-      const { data: res } = await this.$http.delete('goods/' + id)
-      if (res.meta.status !== 200) {
-        return this.$message.error('删除商品失败！')
-      }
-      // 刷新数据列表
+      if (result !== 'confirm') return this.$message.info('已取消删除！')
+
+      console.log('id ===>>>', id)
+      const { meta } = await Goods.deleteGoodsById(id)
+      if (meta.status !== 200) return this.$message.error('删除商品失败！')
+
       this.getGoodsList()
       this.$message.success('删除商品成功！')
     },
     // 显示编辑商品对话框
     async showEditDialog(id) {
-      const { data: res } = await this.$http.get('goods/' + id)
-      console.log(res)
-      if (res.meta.status !== 200) {
-        return this.$message.error('获取参数信息失败！')
-      }
-      this.editForm = res.data
+      const { data, meta } = await Goods.getGoodsById(id)
+      console.log(data)
+      if (meta.status !== 200) return this.$message.error('获取参数信息失败！')
+
+      this.editForm = data
       this.editDialogVisible = true
     },
     // 关闭编辑对话框重置
@@ -178,7 +173,7 @@ export default {
     editCate() {
       this.$refs.editFormRef.validate(async valid => {
         if (!valid) return
-        const { data: res } = await this.$http.put(`goods/${this.editForm.goods_id}`, {
+        const { meta } = await Goods.updateGoodsById(this.editForm.goods_id, {
           goods_name: this.editForm.goods_name,
           goods_price: this.editForm.goods_price,
           goods_number: this.editForm.goods_number,
@@ -186,12 +181,9 @@ export default {
           goods_introduce: this.editForm.goods_introduce,
           goods_cat: this.editForm.goods_cat
         })
-        console.log(res)
-        if (res.meta.status !== 200) {
-          return this.$message.error('修改商品失败！')
-        }
+        if (meta.status !== 200) return this.$message.error('修改商品失败！')
+
         this.$message.success('修改商品成功！')
-        // 刷新数据列表
         this.getGoodsList()
         this.editDialogVisible = false
       })
